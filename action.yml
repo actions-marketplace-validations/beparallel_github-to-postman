@@ -27,6 +27,16 @@ inputs:
     description: 'Either equal to collection or environment'
   postmanEnvSecret1:
     required: false
+    description: 'Optional secret value injected into the synced environment'
+  postmanEnvSecret2:
+    required: false
+    description: 'Optional secret value injected into the synced environment'
+  baseUrlKeyName:
+    required: false
+    description:
+      'Collection sync only. After OpenAPI conversion, rewrite {{baseUrl}} to
+      {{<baseUrlKeyName>}} and rename the root collection variable from baseUrl
+      to baseUrlKeyName. Ignored for environment sync.'
 runs:
-  using: 'node20'
-  main: 'dist/index.js'
+  using: 'node24'
+  main: 'dist/index.mjs'

@@ -1,6 +1,8 @@
-/* eslint-disable no-shadow */
 import * as core from '@actions/core'
-import { syncCollectionWithPostman } from './postman/collection/sync'
+import {
+  getCollectionName,
+  syncCollectionWithPostman
+} from './postman/collection/sync'
 
 import { getFileFromGithub } from './github'
 import { syncEnvironmentWithPostman } from './postman/environment/sync'
@@ -21,8 +23,12 @@ async function run(): Promise<void> {
     const sync: string = core.getInput('sync')
     const githubRef: string = core.getInput('githubRef') ?? 'main'
     const postmanEnvSecret1: string = core.getInput('postmanEnvSecret1')
+    const postmanEnvSecret2: string = core.getInput('postmanEnvSecret2')
+    const baseUrlKeyName: string = core.getInput('baseUrlKeyName')
+
     const postmanEnvSecrets = {
-      postmanEnvSecret1
+      postmanEnvSecret1,
+      postmanEnvSecret2
     }
 
     core.setOutput('workspace', workspace)
@@ -34,14 +40,18 @@ async function run(): Promise<void> {
       githubPath,
       githubRef
     })
-    const jsonfileContent = JSON.parse(stringFileContent)
+
+    const jsonfileContent: unknown = JSON.parse(stringFileContent)
 
     if (sync === SyncPostman.collection) {
+      core.setOutput('githubPath', githubPath)
+      const collectionName = getCollectionName(githubPath)
       await syncCollectionWithPostman({
-        githubPath,
+        collectionName,
         workspace,
         postmanApiKey,
-        jsonfileContent
+        openapiDocument: jsonfileContent as Record<string, unknown>,
+        baseUrlKeyName
       })
     } else if (sync === SyncPostman.environment) {
       await syncEnvironmentWithPostman({
